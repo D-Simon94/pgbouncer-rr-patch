@@ -14,7 +14,7 @@ This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS O
  * pgbouncer-rr extension: call external python function
  */
 
-#include <Python.h>
+#include <py3c.h>
 #include "bouncer.h"
 #include <usual/pgutil.h>
 
@@ -68,7 +68,7 @@ char *pycall(PgSocket *client, char *username, char *query_str, char *py_file,
 	Py_Initialize();
 
 	/* Load python module */
-	pName = PyUnicode_FromString(py_module);
+	pName = PyStr_FromString(py_module);
 	if (pName == NULL)
 	{
 		slog_error(client, "Python module <%s> did not load", py_module);
@@ -104,14 +104,14 @@ char *pycall(PgSocket *client, char *username, char *query_str, char *py_file,
 		slog_error(client, "Python module <%s>: out of memory", py_module);
 		goto finish;
 	}
-	pValue = PyUnicode_FromString(username);
+	pValue = PyStr_FromString(username);
 	if (pValue == NULL)
 	{
 		slog_error(client, "Python module <%s>: out of memory", py_module);
 		goto finish;
 	}
 	PyTuple_SetItem(pArgs, 0, pValue);
-	pValue = PyUnicode_FromString(query_str);
+	pValue = PyStr_FromString(query_str);
 	if (pValue == NULL)
 	{
 		slog_error(client, "Python module <%s>: out of memory", py_module);
@@ -125,9 +125,9 @@ char *pycall(PgSocket *client, char *username, char *query_str, char *py_file,
 				   py_function);
 		goto finish;
 	}
-	if (PyUnicode_Check(pValue))
+	if (PyStr_Check(pValue))
 	{
-		res = strdup(PyUnicode_AsString(pValue));
+		res = strdup(PyStr_AsString(pValue));
 	}
 	else
 	{
@@ -138,7 +138,7 @@ finish:
 	if (PyErr_Occurred())
 	{
 		PyErr_Fetch(&ptype, &perror, &ptraceback);
-		slog_error(client, "Python error: %s", PyUnicode_AsString(perror));
+		slog_error(client, "Python error: %s", PyStr_AsString(perror));
 	}
 	free(py_pathtmp);
 	free(py_filetmp);
