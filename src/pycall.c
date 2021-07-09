@@ -18,32 +18,19 @@ This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS O
 #include "bouncer.h"
 #include <usual/pgutil.h>
 
-static PyObject *
-aview_write(PyObject *self, PyObject *args)
-{
-	const char *what;
-	if (!PyArg_ParseTuple(args, "s", &what))
-		return NULL;
-	printf("==%s==", what);
-	return Py_BuildValue("");
-}
-
-static PyMethodDef a_methods[] = {
-	{"write", aview_write, METH_VARARGS, "Write something."},
-	{NULL, NULL, 0, NULL}};
-
-PyMODINIT_FUNC
-initaview(void)
-{
-	PyObject *m = Py_InitModule("aview", a_methods);
-	if (m == NULL)
-		return;
-	PySys_SetObject("stdout", m);
-}
-
 char *pycall(PgSocket *client, char *username, char *query_str, char *py_file,
 			 char *py_function)
 {
+	PyObject *
+		aview_write(PyObject * self, PyObject * args)
+	{
+		const char *what;
+		if (!PyArg_ParseTuple(args, "s", &what))
+			return NULL;
+		printf("==%s==", what);
+		return Py_BuildValue("");
+	}
+	PySys_SetObject("stdout", aview_write);
 	PyObject *pName = NULL, *pModule = NULL, *pFunc = NULL;
 	PyObject *pArgs = NULL, *pValue = NULL;
 	PyObject *ptype, *perror, *ptraceback;
